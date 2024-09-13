@@ -30,6 +30,11 @@ To run this project locally, you need to install Python and the required depende
 <img width="642" alt="image" src="https://github.com/user-attachments/assets/3bf9e1b4-c73b-497b-9d43-5cf2f8231d7e">
 <img width="638" alt="image" src="https://github.com/user-attachments/assets/1f4cb2d9-2b2f-4763-be45-a4f5beaa1dcf">
 <img width="516" alt="image" src="https://github.com/user-attachments/assets/13e97724-c598-4194-9257-72a9f2466205">
+<img width="340" alt="image" src="https://github.com/user-attachments/assets/d51d34ba-63c1-4031-a5d5-87d285f102a6">
+<img width="694" alt="image" src="https://github.com/user-attachments/assets/34f53cc1-a0ff-4ba2-b542-c31ce78d2e37">
+<img width="698" alt="image" src="https://github.com/user-attachments/assets/590ed68c-78e5-4a29-ae30-3553506fa682">
+<img width="707" alt="image" src="https://github.com/user-attachments/assets/72a74cbe-1d9f-48a4-8795-01bca898f607">
+<img width="683" alt="image" src="https://github.com/user-attachments/assets/68575bc0-b65f-476f-a2c2-5fe719969472">
 
 
 bash
