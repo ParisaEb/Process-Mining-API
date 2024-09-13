@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Page</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8ff; /* Soft background color */
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 60px 80px;
+            max-width: 1200px;
+            margin: 0 auto;
+            border-radius: 15px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff; /* White background for contrast */
+            position: relative;
+            min-height: 100vh;
+        }
+        .text-content {
+            max-width: 50%;
+            animation: fadeInLeft 2s ease-in-out;
+        }
+        .text-content h1 {
+            font-size: 48px;
+            margin: 0;
+            line-height: 1.3;
+            color: #333;
+            animation: slideInLeft 1.5s ease-in-out;
+        }
+        .text-content p {
+            font-size: 18px;
+            margin: 20px 0;
+            color: #555;
+            animation: slideInLeft 2s ease-in-out;
+        }
+        .text-content form {
+            display: inline-block;
+            margin-top: 20px;
+            animation: fadeInUp 2s ease-in-out;
+        }
+        .text-content label {
+            padding: 14px 28px;
+            font-size: 18px;
+            color: white;
+            background-color: #ff6347; /* Tomato color for button */
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            animation: bounceIn 2.5s ease;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .text-content label:hover {
+            background-color: #ff4500;
+            transform: scale(1.05); /* Slightly increase size on hover */
+        }
+        .text-content input[type="file"] {
+            display: none;
+        }
+        .text-content button {
+            padding: 14px 28px;
+            font-size: 18px;
+            color: white;
+            background-color: #20b2aa; /* Light sea green for submit button */
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            animation: bounceIn 2.5s ease;
+            margin-top: 10px;
+        }
+        .text-content button:hover {
+            background-color: #2e8b57;
+            transform: scale(1.05); /* Slightly increase size on hover */
+        }
+        .image-content {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            animation: fadeInRight 2s ease-in-out;
+        }
+        .image-content img {
+            max-width: 300px; /* Smaller image */
+            width: 100%;
+            height: auto;
+        }
+        /* Animations */
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        @keyframes bounceIn {
+            from, 20%, 40%, 60%, 80%, to {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-20px);
+            }
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+        .ribbon {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: #20b2aa; /* Light sea green */
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="text-content">
+            <h1>Upload Your File</h1>
+            <p>Ready to upload and analyze?</p>
+            <form action="/" method="post" enctype="multipart/form-data">
+                <label for="file">Choose a file</label>
+                <input type="file" name="file" id="file" accept=".xes">
+                <button type="submit">Upload</button>
+            </form>
+        </div>
+        <div class="image-content">
+            <img src="{{ url_for('uploaded_file', filename='background.jpg') }}" alt="Ontraak Image">
+        </div>
+    </div>
+</body>
+</html>

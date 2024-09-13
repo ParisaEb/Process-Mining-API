@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Process Mining Results</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://unpkg.com/vis-network/styles/vis-network.min.css" rel="stylesheet" type="text/css"/>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <style>
+        /* General Styles */
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        header, footer {
+            width: 100%;
+            background: #4B0082; /* Matching the landing page's button color */
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        header h1, footer {
+            position: relative;
+            z-index: 2;
+        }
+        .container {
+            max-width: 1200px;
+            width: 90%;
+            background-color: white;
+            padding: 30px;
+            margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #4B0082; /* Matching the landing page's button color */
+            text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            animation: fadeInDown 1s ease-in-out;
+        }
+        @keyframes fadeInDown {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+            animation: fadeInUp 1s ease-in-out;
+        }
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        input[type="file"] {
+            display: none;
+        }
+        label {
+            display: block;
+            background-color: #4B0082; /* Matching the landing page's button color */
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+        }
+        label:hover {
+            background-color: #5D3FD3; /* Matching the hover effect from the landing page */
+        }
+        button[type="submit"], .filter-button {
+            background-color: #4B0082; /* Matching the landing page's button color */
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            margin-top: 10px;
+        }
+        button[type="submit"]:hover, .filter-button:hover {
+            background-color: #5D3FD3; /* Matching the hover effect from the landing page */
+        }
+        .control-buttons button {
+            background-color: #8A2BE2; /* Light violet color for the + and - buttons */
+            color: white;
+            font-size: 18px;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 0 10px rgba(128, 0, 128, 0.5);
+        }
+        .control-buttons button:hover {
+            background-color: #9F5FDF;
+            transform: scale(1.1);
+        }
+        .visualization-container {
+            text-align: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        header, footer {
+            width: 100%;
+            background: #16235B;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        header::after, footer::after {
+            content: "";
+            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"%3E%3Cg fill="%23fff" fill-opacity="0.6"%3E%3Ccircle r="2.5" cx="100" cy="50" /%3E%3Ccircle r="2.5" cx="200" cy="150" /%3E%3Ccircle r="2.5" cx="300" cy="200" /%3E%3Ccircle r="2.5" cx="400" cy="100" /%3E%3Ccircle r="2.5" cx="500" cy="50" /%3E%3Ccircle r="2.5" cx="600" cy="200" /%3E%3Ccircle r="2.5" cx="700" cy="150" /%3E%3Ccircle r="2.5" cx="50" cy="300" /%3E%3Ccircle r="2.5" cx="150" cy="250" /%3E%3Ccircle r="2.5" cx="250" cy="400" /%3E%3Ccircle r="2.5" cx="350" cy="300" /%3E%3Ccircle r="2.5" cx="450" cy="350" /%3E%3Ccircle r="2.5" cx="550" cy="400" /%3E%3Ccircle r="2.5" cx="650" cy="300" /%3E%3Ccircle r="2.5" cx="750" cy="250" /%3E%3Ccircle r="2.5" cx="800" cx="100" /%3E%3Cg%3E%3C/svg%3E') repeat top left;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.6;
+        }
+        header h1, footer {
+            position: relative;
+            z-index: 2;
+        }
+        .container {
+            max-width: 1200px; /* Increase the max-width to utilize more space */
+            width: 90%; /* Use 90% of the available width */
+            background-color: white;
+            padding: 30px;
+            margin: 20px auto; /* Center the container */
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #16235B;
+            text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            animation: fadeInDown 1s ease-in-out;
+        }
+        @keyframes fadeInDown {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+            animation: fadeInUp 1s ease-in-out;
+        }
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        input[type="file"] {
+            display: none;
+        }
+        label {
+            display: block;
+            background-color: #16235B;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+        }
+        label:hover {
+            background-color: #4169e1;
+        }
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        table th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        #searchBar {
+            margin-bottom: 10px;
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button[type="submit"] {
+            background-color: #ba55d3;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            margin-top: 10px;
+        }
+        button[type="submit"]:hover {
+            background-color: #8a2be2;
+        }
+        .visualization-container {
+            text-align: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .visualization {
+            width: 100%;
+            height: auto;
+            cursor: pointer;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out;
+        }
+        .visualization.expanded {
+            max-width: 95%;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+        }
+
+    .activity-selection-container {
+        margin-top: 30px;
+        margin-bottom: 20px;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .instruction-label {
+        font-size: 16px;
+        font-weight: bold;
+        color: #FFFFFF;
+        margin-bottom: 15px;
+        display: white;
+    }
+
+    .dropdown-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 15px;
+    }
+       .activity-selection-container {
+    color: white; /* Set text color inside this container to white */
+}
+    .dropdown-item {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .dropdown-item label {
+        margin-bottom: 5px;
+        font-size: 14px;
+        color: #FFFFFF;
+    }
+.table-container {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px; /* Added border-radius for rounded corners */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse; /* Ensure no double borders */
+    font-size: 14px; /* Set a consistent font size */
+    color: #333; /* Set a standard text color */
+}
+
+table th, table td {
+    border: 1px solid #ddd; /* Uniform border for all cells */
+    padding: 10px; /* Adequate padding for readability */
+}
+
+table th {
+    background-color: #1e3a8a; /* Dark blue background for headers */
+    color: #fff; /* White text color for contrast */
+    position: sticky; /* Keep the header fixed on scroll */
+    top: 0;
+    z-index: 1;
+    text-align: left; /* Align text to the left */
+}
+
+table td {
+    text-align: left; /* Align text to the left for consistency */
+}
+
+    .dropdown-item select {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        width: 200px;
+        font-size: 14px;
+    }
+
+    .filter-button {
+        background-color: #16235B;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-size: 16px;
+    }
+
+    .filter-button:hover {
+        background-color: #4169e1;
+    }
+
+        .tooltip {
+            visibility: hidden;
+            width: 120px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: 150%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .circle-content {
+            display: none;
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 12px;
+            color: #000;
+        }
+        .happy-path-container {
+            text-align: center;
+            margin-top: 20px;
+            animation: fadeIn 1.5s ease-in-out;
+            width: 100%;
+        }
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+        .oval {
+            width: 80px;
+            height: 40px;
+            border: 2px solid #16235B;
+            border-radius: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        .circle {
+            width: 30px;
+            height: 30px;
+            background-color: #16235B;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 5px;
+            transform: translateY(-50%);
+            animation: moveCircle 2s infinite alternate;
+            cursor: pointer;
+        }
+        @keyframes moveCircle {
+            0% {
+                left: 5px;
+            }
+            100% {
+                left: calc(100% - 35px);
+            }
+        }
+        .text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #16235B;
+            margin-left: 10px;
+        }
+        /* Overlay Styles */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"%3E%3Cg fill="%23fff" fill-opacity="0.6"%3E%3Ccircle r="2.5" cx="100" cy="50" /%3E%3Ccircle r="2.5" cx="200" cy="150" /%3E%3Ccircle r="2.5" cx="300" cy="200" /%3E%3Ccircle r="2.5" cx="400" cy="100" /%3E%3Ccircle r="2.5" cx="500" cy="50" /%3E%3Ccircle r="2.5" cx="600" cy="200" /%3E%3Ccircle r="2.5" cx="700" cy="150" /%3E%3Ccircle r="2.5" cx="50" cy="300" /%3E%3Ccircle r="2.5" cx="150" cy="250" /%3E%3Ccircle r="2.5" cx="250" cy="400" /%3E%3Ccircle r="2.5" cx="350" cy="300" /%3E%3Ccircle r="2.5" cx="450" cy="350" /%3E%3Ccircle r="2.5" cx="550" cy="400" /%3E%3Ccircle r="2.5" cx="650" cy="300" /%3E%3Ccircle r="2.5" cx="750" cy="250" /%3E%3Ccircle r="2.5" cx="800" cx="100" /%3E%3Cg%3E%3C/svg%3E') repeat top left;
+            background-repeat: repeat;
+        }
+        .message {
+            display: none;
+            font-size: 20px;
+            font-weight: bold;
+            color: #16235B; /* Dark blue font */
+            text-align: center;
+            margin-top: 20px;
+            animation: fadeIn 3s ease-in-out forwards;
+        }
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .chart-wrapper {
+            width: 400px;
+            height: 400px;
+            margin: 0 auto; /* Center the chart horizontally */
+            position: relative;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 10px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .modal-header {
+            background-color: #16235B;
+            color: white;
+            padding: 10px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        .circular-progress {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+        }
+        .circular-progress .value-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .circular-progress svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+        .circular-progress circle {
+            fill: none;
+            stroke-width: 8;
+            r: 26;
+            cx: 30;
+            cy: 30;
+        }
+        .circular-progress .bg {
+            stroke: #eee;
+        }
+        .circular-progress .progress {
+            stroke: blue;
+            stroke-dasharray: 163.36281798666926; /* Circumference = 2 * PI * 26 */
+            stroke-dashoffset: calc(163.36281798666926 * (1 - var(--progress, 0)));
+            transition: stroke-dashoffset 0.5s;
+        }
+        .icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+        }
+        .incoming, .outgoing {
+            display: flex;
+            align-items: center;
+        }
+    </style>
+    <header>
+        <h1>Process Mining Results</h1>
+    </header>
+    <div class="container">
+        <div class="logo-container">
+            <div class="oval">
+                <div class="circle" onclick="toggleCircle()"></div>
+            </div>
+            <div class="text">ONTRAAK</div>
+        </div>
+        {% if message %}
+            <p>{{ message }}</p>
+        {% endif %}
+        <form method="post" enctype="multipart/form-data">
+            <label for="file">Choose a file</label>
+            <input type="file" name="file" id="file" accept=".xes">
+            <button type="submit">Upload</button>
+        </form>
+        <div id="bubble-chart" style="width: 100%; height: 800px;"></div>
+        <div id="color-legend"></div>
+ <script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const refreshButton = document.getElementById('refreshButton');
+        refreshButton.addEventListener('click', function () {
+            location.reload(); // Reloads the entire page
+        });
+        const activities = {{ activities|tojson }};
+const activityCaseCounts = {{ activity_case_counts|default({})|tojson }};
+        const data = activities.map(activity => ({
+            id: activity,
+            label: activity,
+            value: activityCaseCounts[activity]
+        }));
+
+        const width = 1200;
+        const height = 800;
+
+        const bubble = d3.pack().size([width, height]).padding(1.5);
+
+        // Create the SVG element and enable zoom and pan interactions
+        const svg = d3.select('#bubble-chart')
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height)
+            .call(d3.zoom().on('zoom', function (event) {
+                g.attr('transform', event.transform);  // Allow zooming and panning
+            }));
+
+        const g = svg.append('g');  // Group element for bubbles
+
+        const root = d3.hierarchy({ children: data }).sum(d => d.value);
+
+        bubble(root);
+
+        const colorScale = d3.scaleLinear()
+            .domain([d3.min(data, d => d.value), d3.max(data, d => d.value)])
+            .range(['#ADD8E6', '#00008B']);  // Light blue to dark blue
+
+        const node = g.selectAll('.node')
+            .data(root.children)
+            .enter()
+            .append('g')
+            .attr('class', 'node')
+            .attr('transform', d => `translate(${d.x},${d.y})`);
+
+        node.append('circle')
+            .attr('r', d => d.r)
+            .style('fill', d => colorScale(d.value))
+            .style('stroke', '#000080')
+            .style('stroke-width', '2px');
+
+        // Dynamically adjust the text size to fit the bubble
+        node.append('text')
+            .attr('dy', '0.3em')
+            .style('text-anchor', 'middle')
+            .style('fill', 'white')
+            .each(function(d) {
+                const radius = d.r;  // Circle radius
+                let textElement = d3.select(this);
+                let labelText = d.data.label;
+
+                // Start with a large font size
+                let fontSize = radius / 3;
+                textElement.style('font-size', `${fontSize}px`).text(labelText);
+
+                // Measure the text element's size
+                let textWidth = this.getBBox().width;
+                let textHeight = this.getBBox().height;
+
+                // Reduce font size until the text fits inside the bubble
+                while ((textWidth > 2 * radius || textHeight > 2 * radius) && fontSize > 6) {
+                    fontSize--;
+                    textElement.style('font-size', `${fontSize}px`);
+                    textWidth = this.getBBox().width;
+                    textHeight = this.getBBox().height;
+                }
+
+                // Optionally truncate text if it still doesn't fit
+                if (textWidth > 2 * radius) {
+                    const charactersToFit = Math.floor(radius * 2 / fontSize);
+                    labelText = labelText.substring(0, charactersToFit - 3) + "...";
+                    textElement.text(labelText);
+                }
+            });
+
+        // Add the case count inside the bubble as well, dynamically adjusting font size
+        node.append('text')
+            .attr('dy', '1.6em')
+            .style('text-anchor', 'middle')
+            .style('fill', 'white')
+            .style('font-size', d => `${Math.min(d.r / 4, 18)}px`)  // Scale the font size for the case count
+            .text(d => d.data.value);
+
+        node.append('title').text(d => `${d.data.label}: ${d.data.value}`);
+
+        // Color Legend
+        const legendWidth = 300;
+        const legendHeight = 50;
+
+        const legendSvg = d3.select('#color-legend')
+            .append('svg')
+            .attr('width', legendWidth)
+            .attr('height', legendHeight);
+
+        const gradient = legendSvg.append('defs')
+            .append('linearGradient')
+            .attr('id', 'legendGradient')
+            .attr('x1', '0%')
+            .attr('y1', '0%')
+            .attr('x2', '100%')
+            .attr('y2', '0%');
+
+        gradient.append('stop')
+            .attr('offset', '0%')
+            .attr('style', 'stop-color:#ADD8E6;stop-opacity:1');
+        gradient.append('stop')
+            .attr('offset', '100%')
+            .attr('style', 'stop-color:#00008B;stop-opacity:1');
+
+        legendSvg.append('rect')
+            .attr('x', 0)
+            .attr('y', 0)
+            .attr('width', legendWidth)
+            .attr('height', 20)
+            .style('fill', 'url(#legendGradient)');
+
+        const xScale = d3.scaleLinear()
+            .domain([d3.min(data, d => d.value), d3.max(data, d => d.value)])
+            .range([0, legendWidth]);
+
+        const xAxis = d3.axisBottom(xScale).ticks(5).tickFormat(d3.format(".0f"));
+
+        legendSvg.append('g')
+            .attr('class', 'axis')
+            .attr('transform', `translate(0,20)`)
+            .call(xAxis);
+
+        legendSvg.append('text')
+            .attr('x', legendWidth / 2)
+            .attr('y', 40)
+            .attr('text-anchor', 'middle')
+            .style('fill', '#000')
+            .text('Case Count');
+    });
+</script>
+
+
+        <div>
+            <label for="transitionSelect">Select Transition:</label>
+            <select id="transitionSelect" onchange="updatePetriNet()">
+                <option value="">All Transitions</option>
+                {% for transition in transitions %}
+                    <option value="{{ transition }}">{{ transition }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="control-buttons">
+            <button onclick="decreaseLimit()">-</button>
+            <button onclick="increaseLimit()">+</button>
+        </div>
+        <div class="visualization-container">
+            {% if petri_net_json_data %}
+                <h2>Interactive Petri Net Visualization</h2>
+                <div id="petrinet" style="width: 1200px; height: 800px;"></div>
+                <script>
+                    var allData = {{ petri_net_json_data|safe }};
+                    var initialData = JSON.parse(JSON.stringify(allData)); // Deep copy of initial data
+                    var transitionLimit = 5; // Default limit for transitions
+                    function draw(data) {
+                        var container = document.getElementById('petrinet');
+                        var options = {
+                            nodes: {
+                                shape: 'dot',
+                                size: 20
+                            },
+                            edges: {
+                                arrows: 'to',
+                                smooth: {
+                                    type: 'dynamic',
+                                    roundness: 0.2
+                                }
+                            },
+                            physics: {
+                                enabled: true,
+                                stabilization: {
+                                    enabled: true,
+                                    iterations: 1000, // Adjust the number of iterations if needed
+                                    updateInterval: 25
+                                }
+                            },
+                            interaction: {
+                                dragNodes: true,
+                                dragView: true,
+                                zoomView: true
+                            }
+                        };
+                        var network = new vis.Network(container, data, options);
+                        // Stabilize the network initially and then disable physics
+                        network.once('stabilizationIterationsDone', function () {
+                            network.setOptions({ physics: false });
+                        });
+                    }
+                    function updatePetriNet() {
+                        var selectedTransition = document.getElementById('transitionSelect').value;
+                        if (selectedTransition === "") {
+                            draw(initialData);
+                            return;
+                        }
+                        var connectedNodes = [];
+                        var connectedEdges = [];
+                        var placesToHighlight = new Set();
+                        // Find the selected transition node
+                        var selectedNode = initialData.nodes.find(node => node.label === selectedTransition);
+                        if (selectedNode) {
+                            connectedNodes.push(selectedNode);
+                            // Highlight all edges connected to the selected transition up to the limit
+                            var edgeCount = 0;
+                            initialData.edges.forEach(edge => {
+                                if (edgeCount >= transitionLimit) return;
+                                if (edge.from === selectedNode.id || edge.to === selectedNode.id) {
+                                    connectedEdges.push(edge);
+                                    placesToHighlight.add(edge.from === selectedNode.id ? edge.to : edge.from);
+                                    edgeCount++;
+                                }
+                            });
+                            // Highlight places connected to these edges and any additional transitions connected to these places up to the limit
+                            placesToHighlight.forEach(placeId => {
+                                var placeNode = initialData.nodes.find(node => node.id === placeId);
+                                if (placeNode) {
+                                    connectedNodes.push(placeNode);
+                                    edgeCount = 0;
+                                    initialData.edges.forEach(edge => {
+                                        if (edgeCount >= transitionLimit) return;
+                                        if (edge.from === placeId || edge.to === placeId) {
+                                            connectedEdges.push(edge);
+                                            var transitionId = edge.from === placeId ? edge.to : placeId;
+                                            var transitionNode = initialData.nodes.find(node => node.id === transitionId);
+                                            if (transitionNode && !connectedNodes.some(node => node.id === transitionNode.id)) {
+                                                connectedNodes.push(transitionNode);
+                                            }
+                                            edgeCount++;
+                                        }
+                                    });
+                                }
+                            });
+                            // Modify size and style of connected nodes
+                            connectedNodes.forEach(node => {
+                                node.size = 50; // Increase size of connected nodes
+                                node.opacity = 1.0; // Make connected nodes fully opaque
+                            });
+                            // Dim and disable other nodes
+                            initialData.nodes.forEach(node => {
+                                if (!connectedNodes.some(connectedNode => connectedNode.id === node.id)) {
+                                    node.size = 5; // Decrease size of unconnected nodes
+                                    node.opacity = 0.1; // Make unconnected nodes transparent
+                                    node.interaction = false; // Disable interaction for unconnected nodes
+                                }
+                            });
+                            // Dim and disable other edges
+                            initialData.edges.forEach(edge => {
+                                if (!connectedEdges.some(connectedEdge => connectedEdge.from === edge.from && connectedEdge.to === edge.to)) {
+                                    edge.color = 'rgba(200,200,200,0.5)'; // Dim color of unconnected edges
+                                    edge.smooth = false; // Make unconnected edges straight
+                                    edge.width = 1; // Decrease width of unconnected edges
+                                } else {
+                                    edge.color = 'blue'; // Highlight connected edges
+                                    edge.smooth = {
+                                        type: 'dynamic',
+                                        roundness: 0.2
+                                    }; // Make connected edges curved
+                                    edge.width = 2; // Increase width of connected edges
+                                }
+                            });
+                        }
+                        var filteredData = { nodes: initialData.nodes, edges: initialData.edges };
+                        draw(filteredData);
+                    }
+                    document.addEventListener('DOMContentLoaded', function () {
+                        draw(initialData); // Draw the initial Petri net
+                    });
+                    function increaseLimit() {
+                        transitionLimit += 1;
+                        updatePetriNet();
+                    }
+                    function decreaseLimit() {
+                        if (transitionLimit > 1) {
+                            transitionLimit -= 1;
+                            updatePetriNet();
+                        }
+                    }
+                    document.addEventListener('DOMContentLoaded', function () {
+                        draw(initialData); // Draw the initial Petri net
+                    });
+                    function filterTransitions() {
+                        const act1 = document.getElementById('act1Select').value;
+                        const act2 = document.getElementById('act2Select').value;
+                        if (act1 && act2) {
+                            fetch('/filter_transitions', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ act1, act2, file_path: '{{ file_path }}' }),
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    const container = document.getElementById('filtered-dfg');
+                                    const options = {
+                                        nodes: {
+                                            shape: 'box',
+                                            size: 15,
+                                            shadow: { color: '#000', size: 5 },
+                                            font: { color: 'white' }
+                                        },
+                                        edges: {
+                                            arrows: 'to',
+                                            smooth: { type: 'curvedCW', roundness: 0.2 },
+                                            color: { color: 'violet', highlight: 'violet', hover: 'violet' },
+                                            font: { align: 'top', color: 'darkblue' }
+                                        },
+                                        physics: false,
+                                        layout: {
+                                            improvedLayout: true
+                                        }
+                                    };
+                                    const network = new vis.Network(container, data, options);
+                                    // Weight threshold slider
+                                    const slider = document.getElementById('filteredWeightSlider');
+                                    const sortedEdges = data.edges.slice().sort((a, b) => parseFloat(b.label) - parseFloat(a.label));
+                                    function updateFilteredNetwork(threshold) {
+                                        const numEdgesToShow = Math.floor((threshold / 100) * sortedEdges.length);
+                                        const newEdges = sortedEdges.slice(0, numEdgesToShow);
+                                        const newNodes = {};
+                                        newEdges.forEach(edge => {
+                                            newNodes[edge.from] = true;
+                                            newNodes[edge.to] = true;
+                                        });
+                                        const filteredNodes = data.nodes.filter(node => newNodes[node.id]);
+                                        const filteredData = { nodes: filteredNodes, edges: newEdges };
+                                        network.setData(filteredData);
+                                    }
+                                    slider.addEventListener('input', (event) => {
+                                        const threshold = parseFloat(event.target.value);
+                                        updateFilteredNetwork(threshold);
+                                    });
+                                    updateFilteredNetwork(0); // Initialize with no threshold
+                                })
+                                .catch(error => console.error('Error:', error));
+                        } else {
+                            alert('Please select both activities.');
+                        }
+                    }
+                </script>
+            {% endif %}
+            {% if dfg_initial_data and dfg_all_data %}
+                <h2>Interactive DFG Visualization</h2>
+                <div id="mynetwork" style="width: 1200px; height: 800px;"></div>
+               <div id="sliderContainer" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+    <input type="range" min="0" max="100" value="0" id="weightSlider">
+    <label for="weightSlider">Weight Threshold</label>
+    <button id="refreshButton">Refresh</button>
+</div>
+
+
+                <div id="variant-dfg-without-container" style="margin-top: 30px;">
+                    <h3 id="variant-dfg-without-label"></h3>
+                    <div id="variant-dfg-without" style="width: 1200px; height: 800px;"></div>
+                </div>
+                <div id="variant-dfg-with-container" style="margin-top: 30px;">
+                    <h3 id="variant-dfg-with-label"></h3>
+                    <div id="variant-dfg-with" style="width: 1200px; height: 800px;"></div>
+                </div>
+                <div class="activity-selection-container">
+    <label class="instruction-label" for="activity-selection">To see the activities between two activities, select ACTIVITY 1 and ACTIVITY 2:</label>
+
+    <div class="dropdown-container">
+        <div class="dropdown-item">
+            <label for="act1Select">Select Activity 1:</label>
+            <select id="act1Select">
+                <option value="">Select Activity 1</option>
+                {% for activity in activities %}
+                    <option value="{{ activity }}">{{ activity }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="dropdown-item">
+            <label for="act2Select">Select Activity 2:</label>
+            <select id="act2Select">
+                <option value="">Select Activity 2</option>
+                {% for activity in activities %}
+                    <option value="{{ activity }}">{{ activity }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <button type="button" onclick="filterTransitions()" class="filter-button">Filter</button>
+</div>
+            <div id="filtered-dfg" style="width: 1400px; height: 1000px;"></div>
+    <div id="filteredSliderContainer" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+        <input type="range" min="0" max="100" value="0" id="filteredWeightSlider">
+                <label for="filteredWeightSlider">Filtered Weight Threshold</label>
+            </div>
+            </div>
+
+                <script>
+                            let allDFGData;
+
+                    document.addEventListener('DOMContentLoaded', (event) => {
+            const networkContainer = document.getElementById('mynetwork');
+            const slider = document.getElementById('weightSlider');
+
+            // Fetch initial DFG data
+            const initialDFGData = {{ dfg_initial_data|safe }};
+            allDFGData = {{ dfg_all_data|safe }};
+               function updateNetwork(threshold) {
+            const numEdgesToShow = Math.floor((threshold / 100) * sortedEdges.length);
+            const newEdges = sortedEdges.slice(0, numEdgesToShow);
+            const newNodes = {};
+            newEdges.forEach(edge => {
+                newNodes[edge.from] = true;
+                newNodes[edge.to] = true;
+            });
+            const filteredNodes = allDFGData.nodes.filter(node => newNodes[node.id]);
+            const data = {
+                nodes: filteredNodes,
+                edges: newEdges
+            };
+            network.setData(data);
+        }
+
+            console.log('Initial DFG data:', initialDFGData);
+            console.log('All DFG data:', allDFGData);
+
+            // Sort all edges by weight in descending order
+            const sortedEdges = allDFGData.edges.slice().sort((a, b) => parseFloat(b.label) - parseFloat(a.label));
+
+            // Function to update the network based on the slider value
+            function updateNetwork(threshold) {
+                const numEdgesToShow = Math.floor((threshold / 100) * sortedEdges.length);
+                // Create new data with the selected number of edges
+                const newEdges = sortedEdges.slice(0, numEdgesToShow);
+                // Collect nodes that are part of the new edges
+                const newNodes = {};
+                newEdges.forEach(edge => {
+                    newNodes[edge.from] = true;
+                    newNodes[edge.to] = true;
+                });
+                // Filter nodes to include only those that are part of the new edges
+                const filteredNodes = allDFGData.nodes.filter(node => newNodes[node.id]);
+                const data = {
+                    nodes: filteredNodes,
+                    edges: newEdges
+                };
+                console.log('Updating network with data:', data);
+                network.setData(data);
+            }
+
+            // Initialize network with initial DFG data (happy path)
+            const options = {
+                nodes: {
+                    shape: 'box',
+                    size: 15,
+                    shadow: { color: '#000', size: 5 },
+                    font: { color: 'white' }
+                },
+                edges: {
+                    arrows: 'to',
+                    smooth: { type: 'curvedCW', roundness: 0.2 },
+                    color: { color: 'violet', highlight: 'violet', hover: 'violet' },
+                    font: { align: 'top', color: 'darkblue' }
+                },
+                physics: false,
+                layout: {
+                    improvedLayout: true
+                }
+            };
+
+            let network = new vis.Network(networkContainer, initialDFGData, options);
+
+            // Update network based on slider input
+            slider.addEventListener('input', (event) => {
+                const threshold = parseFloat(event.target.value);
+                updateNetwork(threshold);
+            });
+
+            // Initial update to show only the happy path
+            updateNetwork(0);
+
+            // Add click event listener for transitions
+            network.on('click', function (params) {
+                if (params.nodes.length > 0) {
+                    const nodeId = params.nodes[0];
+                    const node = allDFGData.nodes.find(n => n.id === nodeId);
+                    if (node && node.label) {
+                        showModal(node.label);
+                    }
+                }
+            });
+        });
+
+                   // Function to show modal with transition details
+function showModal(transition) {
+    fetch('/transition_info', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ transition: transition, file_path: '{{ file_path }}' }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        const modal = document.getElementById('transitionModal');
+        const modalHeader = document.getElementById('modal-header');
+        const modalText = document.getElementById('modal-text');
+        modalHeader.innerHTML = `<h2>${transition}</h2>`;
+        modalText.innerHTML = `
+            <div class="circular-progress">
+                <svg>
+                    <circle class="bg" cx="30" cy="30" r="26"></circle>
+                    <circle class="progress" cx="30" cy="30" r="26"></circle>
+                </svg>
+                <div class="value-container">0%</div>
+            </div>
+            <p>Occurs in ${data.percentage_cases.toFixed(2)}% of cases.</p>
+            <p>Most common incoming transition: ${data.most_common_incoming.transition} </p>
+            <p>Most common outgoing transition: ${data.most_common_outgoing.transition}</p>
+        `;
+        modal.style.display = 'block';
+        animateProgress(data.percentage_cases, '.circular-progress .progress', '.circular-progress .value-container');
+
+        // Add buttons and their functionality
+        const withButton = document.getElementById('withButton');
+        const withoutButton = document.getElementById('withoutButton');
+        const selectButton = document.getElementById('selectButton');
+
+        withButton.onclick = function() {
+            updateDFGWithWithout(transition, true);
+            modal.style.display = 'none';
+        };
+        withoutButton.onclick = function() {
+            updateDFGWithWithout(transition, false);
+            modal.style.display = 'none';
+        };
+        selectButton.onclick = function() {
+            console.log('Select this Node button clicked');
+            selectTransition(transition, data.incoming_transitions, data.outgoing_transitions);
+            modal.style.display = 'none';
+        };
+    })
+    .catch(error => console.error('Error fetching transition info:', error));
+}
+
+ closeModalButton.addEventListener('click', function() {
+        modal.style.display = 'none';
+    });
+
+
+            closeModalButton.addEventListener('click', () => {
+                const modal = document.getElementById('transitionModal');
+                const closeModalButton = document.querySelector('.close');
+
+                modal.style.display = 'none';
+            });
+
+            window.onclick = function(event) {
+                const modal = document.getElementById('transitionModal');
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            };
+
+                    // Initialize a global variable to store the network instance
+                    let network = null;
+                    function updateDFGWithWithout(transition, include) {
+    fetch('/filter_dfg_variants', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            file_path: '{{ file_path }}',
+            transition: transition,
+            include: include
+        }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Filtered DFG data:', data);  // Debug print
+        const containerId = include ? 'variant-dfg-with' : 'variant-dfg-without';
+        const labelId = include ? 'variant-dfg-with-label' : 'variant-dfg-without-label';
+        const container = document.getElementById(containerId);
+        const label = document.getElementById(labelId);
+        if (!container || !label) {
+            console.error('Container or label element not found.');
+            return;
+        }
+        label.textContent = include ? `Process With ${transition}` : `Process Without ${transition}`;
+
+        // Process nodes and edges from the received data
+        const nodes = data.nodes.map(node => ({
+            ...node,
+            label: node.label,
+            shape: 'box'
+        }));
+        const edges = data.edges.map(edge => ({
+            ...edge,
+            color: { color: 'violet', highlight: 'violet', hover: 'violet' },
+            font: { align: 'top', color: 'darkblue' }
+        }));
+
+        // Ensure start and end nodes are included
+        if (!nodes.some(node => node.id === 'start')) {
+            nodes.push({
+                id: 'start',
+                label: 'Start',
+                shape: 'ellipse',
+                color: { background: 'green' },
+                size: 30
+            });
+        }
+        if (!nodes.some(node => node.id === 'end')) {
+            nodes.push({
+                id: 'end',
+                label: 'End',
+                shape: 'ellipse',
+                color: { background: 'red' },
+                size: 30
+            });
+        }
+
+        // Add edges connecting start and end nodes to their respective activities
+        edges.push(...initialData.edges.filter(edge => edge.from === 'start' || edge.to === 'end'));
+
+        const options = {
+        layout: {
+            hierarchical: {
+                direction: 'UD', // Up to Down
+                sortMethod: 'directed',
+                nodeSpacing: 150,
+                levelSeparation: 200,
+            }
+        },
+            physics: {
+                enabled: true,
+                solver: 'forceAtlas2Based',
+                forceAtlas2Based: {
+                    gravitationalConstant: -50,
+                    centralGravity: 0.005,
+                    springLength: 100,
+                    springConstant: 0.18,
+                },
+                maxVelocity: 50,
+                minVelocity: 0.1,
+                stabilization: {
+                    enabled: true,
+                    iterations: 1000,
+                    updateInterval: 25
+                }
+            },
+            nodes: {
+                shape: 'box',
+                size: 15,
+                shadow: { color: '#000', size: 5 },
+                font: { color: 'white' }
+            },
+            edges: {
+                arrows: 'to',
+                smooth: { type: 'dynamic', roundness: 0.5 }
+            }
+        };
+
+        const network = new vis.Network(container, { nodes, edges }, options);
+        network.once('stabilizationIterationsDone', function () {
+            network.setOptions({ physics: false });
+        });
+    })
+    .catch(error => console.error('Error updating DFG:', error));
+}
+
+                    function animateProgress(progress, progressSelector, valueContainerSelector) {
+                        const circle = document.querySelector(progressSelector);
+                        const valueContainer = document.querySelector(valueContainerSelector);
+                        const radius = circle.r.baseVal.value;
+                        const circumference = 2 * Math.PI * radius;
+                        circle.style.strokeDasharray = `${circumference} ${circumference}`;
+                        circle.style.strokeDashoffset = circumference;
+                        const offset = circumference - (progress / 100) * circumference;
+                        circle.style.transition = 'stroke-dashoffset 1s';
+                        circle.style.strokeDashoffset = offset;
+                        let currentProgress = 0;
+                        const updateInterval = setInterval(() => {
+                            const newOffset = circumference - (currentProgress / 100) * circumference;
+                            circle.style.strokeDashoffset = newOffset;
+                            valueContainer.textContent = `${currentProgress.toFixed(2)}%`;
+                            if (currentProgress >= progress) {
+                                clearInterval(updateInterval);
+                            } else {
+                                currentProgress += 1;
+                            }
+                        }, 10); // Adjust the interval for the desired speed of the animation
+                    }
+
+   function selectTransition(transition, incomingTransitions, outgoingTransitions) {
+    console.log('Inside selectTransition function');
+    console.log('Selected Transition:', transition);
+    console.log('Incoming Transitions:', incomingTransitions);
+    console.log('Outgoing Transitions:', outgoingTransitions);
+
+    // Ensure allDFGData is defined
+    if (!allDFGData || !allDFGData.nodes || !allDFGData.edges) {
+        console.error('allDFGData is not defined properly.');
+        return;
+    }
+
+    // Trim the transition name to remove any extra whitespace
+    const trimmedTransition = transition.trim();
+
+    // Find the selected node
+    const selectedNode = allDFGData.nodes.find(node => node.label === trimmedTransition);
+    if (!selectedNode) {
+        console.log('Selected node not found');
+        return;
+    }
+
+    // Highlight connected nodes and edges
+    const connectedNodes = new Set();
+    const connectedEdges = new Set();
+
+    // Add the selected node
+    connectedNodes.add(selectedNode.id);
+
+    // Add incoming nodes and edges
+    incomingTransitions.forEach(inc => {
+        const incNode = allDFGData.nodes.find(node => node.label === inc);
+        if (incNode) {
+            connectedNodes.add(incNode.id);
+            const edge = allDFGData.edges.find(edge => edge.to === selectedNode.id && edge.from === incNode.id);
+            if (edge) {
+                connectedEdges.add(edge.id);
+            }
+        }
+    });
+
+    // Add outgoing nodes and edges
+    outgoingTransitions.forEach(out => {
+        const outNode = allDFGData.nodes.find(node => node.label === out);
+        if (outNode) {
+            connectedNodes.add(outNode.id);
+            const edge = allDFGData.edges.find(edge => edge.from === selectedNode.id && edge.to === outNode.id);
+            if (edge) {
+                connectedEdges.add(edge.id);
+            }
+        }
+    });
+
+    // Update node and edge styles
+    allDFGData.nodes.forEach(node => {
+        if (connectedNodes.has(node.id)) {
+            node.size = 50; // Increase size of connected nodes
+            node.color = 'blue'; // Change color of connected nodes
+            node.opacity = 1.0; // Make connected nodes fully opaque
+                        node.font = { color: 'white' };
+
+        } else {
+            node.size = 20; // Normal size for unconnected nodes
+            node.color = 'white'; // Make unconnected nodes white
+            node.opacity = 0.5; // Make unconnected nodes semi-transparent
+
+        }
+    });
+
+    allDFGData.edges.forEach(edge => {
+        if (connectedEdges.has(edge.id)) {
+            edge.color = 'blue'; // Highlight connected edges
+            edge.width = 2; // Increase width of connected edges
+        } else {
+            edge.color = 'rgba(200,200,200,0.5)'; // Dim color of unconnected edges
+            edge.width = 1; // Normal width for unconnected edges
+        }
+    });
+
+    // Create new network data with updated styles
+    const filteredData = {
+        nodes: new vis.DataSet(allDFGData.nodes),
+        edges: new vis.DataSet(allDFGData.edges)
+    };
+
+    // Redraw the DFG with updated data
+    const container = document.getElementById('mynetwork');
+    const options = {
+        nodes: {
+            shape: 'box',
+            size: 20
+        },
+        edges: {
+            arrows: 'to',
+            smooth: {
+                type: 'curvedCW',
+                roundness: 0.2
+            }
+        },
+        physics: {
+            enabled: false
+        },
+        interaction: {
+            dragNodes: true,
+            dragView: true,
+            zoomView: true
+        }
+    };
+
+    // Create a new network instance
+    const network = new vis.Network(container, filteredData, options);
+
+    // Ensure the weight slider continues to function after the network update
+    const slider = document.getElementById('weightSlider');
+    slider.removeEventListener('input', handleSliderInput); // Remove any existing listener
+    slider.addEventListener('input', handleSliderInput);
+     updateNetwork(0);
+
+    // Function to handle slider input
+    function handleSliderInput(event) {
+        const threshold = parseFloat(event.target.value);
+        updateNetwork(threshold);
+    }
+    // Function to update the network based on the slider value
+    function updateNetwork(threshold) {
+        const numEdgesToShow = Math.floor((threshold / 100) * sortedEdges.length);
+        const newEdges = sortedEdges.slice(0, numEdgesToShow);
+        const newNodes = {};
+        newEdges.forEach(edge => {
+            newNodes[edge.from] = true;
+            newNodes[edge.to] = true;
+        });
+        const filteredNodes = allDFGData.nodes.filter(node => newNodes[node.id]);
+        const data = {
+            nodes: filteredNodes,
+            edges: newEdges
+        };
+
+        console.log('Updating network with data:', data);
+        network.setData(data);
+    }
+
+    // Initial call to update the network based on the current slider value
+    const threshold = parseFloat(slider.value);
+    updateNetwork(threshold);
+}
+
+                </script>
+            {% endif %}
+            {% if variants_json_data %}
+                <h2>Variants Plot</h2>
+                <canvas id="variantsChart" width="400" height="200"></canvas>
+                <script>
+                    const variantData = {{ variants_json_data|safe }};
+                    const labels = variantData.variants.map((v, index) => index + 1).map(String);
+                    labels[labels.length - 1] = 'Other'; // Label the last one as "Other"
+                    const data = variantData.variants.map(v => v.count);
+                    const ctx = document.getElementById('variantsChart').getContext('2d');
+                    const chart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Variant Frequency',
+                                data: data,
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            onClick: (e, elements) => {
+                                if (elements.length > 0) {
+                                    const index = elements[0].index;
+                                    const selectedVariant = variantData.variants[index].variant;
+                                    console.log(`Clicked variant: ${selectedVariant}`);
+                                    fetchVariantData(selectedVariant);
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                    function fetchVariantData(variant) {
+                        fetch('/get_variant_data', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ variant: variant, file_path: '{{ file_path }}' }),
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            updateTable(data.cases);
+                            updateVariantDFG(data.dfg);
+                        })
+                        .catch(error => console.error('Error fetching variant data:', error));
+                    }
+                    function updateTable(cases) {
+                        const tableBody = document.querySelector("table tbody");
+                        tableBody.innerHTML = ''; // Clear the table
+                        // Create a Set to keep track of unique case IDs
+                        const uniqueCases = new Set();
+                        const caseDataList = [];
+                        // Collect unique cases and their attributes
+                        cases.forEach(caseData => {
+                            const caseID = caseData['case:concept:name'];
+                            if (!uniqueCases.has(caseID)) {
+                                uniqueCases.add(caseID);
+                                // Filter out the activity and timestamp attributes
+                                const filteredCaseData = {};
+                                for (const [key, value] of Object.entries(caseData)) {
+                                    if (key !== 'concept:name' && key !== 'time:timestamp') {
+                                        filteredCaseData[key] = value;
+                                    }
+                                }
+                                caseDataList.push(filteredCaseData);
+                            }
+                        });
+                        // Populate the table with filtered case data
+                        caseDataList.forEach(caseData => {
+                            const row = document.createElement('tr');
+                            Object.values(caseData).forEach(cellData => {
+                                const cell = document.createElement('td');
+                                cell.textContent = cellData;
+                                row.appendChild(cell);
+                            });
+                            tableBody.appendChild(row);
+                        });
+                    }
+                    function updateVariantDFG(data) {
+                        console.log('Updating variant DFG:', data);
+                        // Ensure the container is ready for new visualization
+                        const container = document.getElementById('variant-dfg-container');
+                        container.innerHTML = ""; // Clear previous content
+                        // Prepare nodes and edges from DFG data
+                        const nodes = [];
+                        const edges = [];
+                        const nodeSet = new Set();
+                        // Create nodes and edges from the DFG data
+                        for (const [key, value] of Object.entries(data)) {
+                            const [source, target] = key.split(' -> ');
+                            if (!nodeSet.has(source)) {
+                                nodes.push({ id: source, label: source, shape: 'box' });
+                                nodeSet.add(source);
+                            }
+                            if (!nodeSet.has(target)) {
+                                nodes.push({ id: target, label: target, shape: 'box' });
+                                nodeSet.add(target);
+                            }
+                            edges.push({
+                                from: source,
+                                to: target,
+                                label: String(value),
+                                arrows: 'to',
+                                font: { align: 'top' },
+                                smooth: { type: 'curvedCW', roundness: 0.2 }
+                            });
+                        }
+                        // Ensure start and end nodes are included
+                        if (!nodeSet.has('start')) {
+                            nodes.push({
+                                id: 'start',
+                                label: 'Start',
+                                shape: 'ellipse',
+                                color: { background: 'green' },
+                                size: 30,
+                                x: -200,
+                                y: 0
+                            });
+                            nodeSet.add('start');
+                        }
+                        if (!nodeSet.has('end')) {
+                            nodes.push({
+                                id: 'end',
+                                label: 'End',
+                                shape: 'ellipse',
+                                color: { background: 'red' },
+                                size: 30,
+                                x: 2000,
+                                y: 0
+                            });
+                            nodeSet.add('end');
+                        }
+                        // Add edges connecting start and end nodes to their respective activities
+                        edges.push(...initialData.edges.filter(edge => edge.from === 'start' || edge.to === 'end'));
+                        const dfgData = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
+                        const options = {
+                            nodes: {
+                                shape: 'box',
+                                size: 15,
+                                shadow: { color: '#000', size: 5 },
+                                font: { color: 'white' }
+                            },
+
+                            edges: {
+                                arrows: 'to',
+                                smooth: { type: 'curvedCW', roundness: 0.2 },
+                                color: { color: 'violet', highlight: 'violet', hover: 'violet' },
+                                font: { align: 'top', color: 'darkblue' }
+                            },
+                            physics: false,
+                        };
+                        // Create a new network instance for the variant-specific DFG
+                        new vis.Network(container, dfgData, options);
+                    }
+                </script>
+                <div>
+                    <h2>Data Analysis Table</h2>
+                    <div class="table-container">
+                        {{ pandas_html|safe }}
+                    </div>
+                </div>
+            <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Hide the 'concept:name' and 'time:timestamp' columns
+        const table = document.querySelector('.table-container table');
+        if (table) {
+            // Get the index of the columns you want to hide
+            const headers = Array.from(table.querySelectorAll('th'));
+            const conceptNameIndex = headers.findIndex(th => th.textContent.trim() === 'concept:name');
+            const timestampIndex = headers.findIndex(th => th.textContent.trim() === 'time:timestamp');
+
+            // Hide the header cells
+            if (conceptNameIndex !== -1) headers[conceptNameIndex].style.display = 'none';
+            if (timestampIndex !== -1) headers[timestampIndex].style.display = 'none';
+
+            // Hide the data cells in each row
+            const rows = table.querySelectorAll('tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length > 0) {
+                    if (conceptNameIndex !== -1) cells[conceptNameIndex].style.display = 'none';
+                    if (timestampIndex !== -1) cells[timestampIndex].style.display = 'none';
+                }
+            });
+        }
+    });
+</script>
+            {% endif %}
+            <!-- New DFG Visualization for Selected Variant -->
+            <div id="variant-dfg-container" style="width: 800px; height: 600px; margin-top: 30px;"></div>
+            <div id="add-more-button-container" style="text-align: center; margin-top: 10px;">
+                <button id="add-more-button" style="display: none;">Add More Activities</button>
+            </div>
+            <!-- New DFG Visualization for Filtered Transitions -->
+
+            <div class="happy-path-container">
+                <h2>Happy Path Percentage</h2>
+                <div class="chart-wrapper">
+                    <canvas id="happyPathDonutChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+            <div class="happy-path-circular-progress">
+                <div class="value-container">{{ happy_path_percentage }}% of cases flow via happy path</div>
+            </div>
+            {% if happy_path_json_data %}
+                <h2>Happy Path Visualization</h2>
+                <div id="happy-path-network" style="width: 800px; height: 600px;"></div>
+                <script>
+                    const happyPathData = {{ happy_path_json_data|safe }};
+                    const happyPathOptions = {
+                        nodes: {
+                            shape: 'box',
+                            direction: 'UD',
+                            size: 15,
+                            shadow: { color: '#000', size: 5 },
+                            font: { color: 'white' }
+                        },
+                        edges: {
+                            arrows: 'to',
+                            smooth: { type: 'curvedCW', roundness: 0.2 },
+                            color: { color: 'violet', highlight: 'violet', hover: 'violet' },
+                            font: { align: 'top', color: 'darkblue' }
+                        },
+                        physics: false,
+                        layout: {
+                            improvedLayout: true
+                        }
+                    };
+                    const happyPathNetwork = new vis.Network(
+                        document.getElementById('happy-path-network'),
+                        happyPathData,
+                        happyPathOptions
+                    );
+                </script>
+            {% endif %}
+        </div>
+    </div>
+    <footer>
+        &copy; 2024 ONTRAAK. Developed by Parisa Ebrahimi, All rights reserved.
+    </footer>
+    <div class="overlay" id="overlay" onclick="toggleOverlay()"></div>
+    <div class="message" id="message">Une nouvelle ère dans la recherche de performance opérationnelle</div>
+    <div class="star-container" id="star-container"></div>
+    <script>
+        // Function to toggle the 'expanded' class on the clicked visualization
+        function toggleExpanded(event) {
+            const visualization = event.target;
+            visualization.classList.toggle('expanded');
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            // Add event listeners to the visualizations
+            const petriNetImg = document.getElementById('petri-net');
+            const dfgImg = document.getElementById('dfg');
+            const happyPathImg = document.getElementById('happy-path');
+            if (petriNetImg) {
+                petriNetImg.addEventListener('click', toggleExpanded);
+            }
+            if (dfgImg) {
+                dfgImg.addEventListener('click', toggleExpanded);
+            }
+            if (happyPathImg) {
+                happyPathImg.addEventListener('click', toggleExpanded);
+            }
+            // Star animation
+            const starContainer = document.getElementById('star-container');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.top = Math.random() * window.innerHeight + 'px';
+                star.style.left = Math.random() * window.innerWidth + 'px';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                star.style.animationDuration = Math.random() * 2 + 1 + 's';
+                starContainer.appendChild(star);
+            }
+        });
+        // Simulating backend processing with a timeout
+        setTimeout(() => {
+            // When backend processing is complete, stop the animation
+            document.querySelector('.circle').style.animation = 'none';
+        }, 5000); // Adjust the time as per your backend processing time
+        // Function to toggle the overlay
+        function toggleOverlay() {
+            const overlay = document.getElementById('overlay');
+            overlay.style.display = overlay.style.display === 'flex' ? 'none' : 'flex';
+        }
+        // Function to toggle the circle position and show the overlay and message
+        function toggleCircle() {
+            const circle = document.querySelector('.circle');
+            const overlay = document.getElementById('overlay');
+            const message = document.getElementById('message');
+            // Toggle the circle position
+            const isAtLeft = circle.style.left === '5px' || circle.style.left === '';
+            circle.style.transition = 'left 1s ease-in-out';
+            circle.style.left = isAtLeft ? 'calc(100% - 35px)' : '5px';
+            // Show the overlay immediately
+            overlay.style.display = 'flex';
+            // Show the text message with animation
+            setTimeout(() => {
+                message.style.display = 'block';
+                message.style.animation = 'fadeIn 3s ease-in-out forwards';
+            }, 500); // Short delay to allow the circle movement
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            // Existing happy path data
+            const happyPathPercentage = {{ happy_path_percentage }};
+            const totalCases = 100; // Assuming the total cases percentage is 100%
+            // Data for the donut chart
+            const donutData = {
+                labels: ['Happy Path', 'Other Paths'],
+                datasets: [{
+                    data: [happyPathPercentage, totalCases - happyPathPercentage],
+                    backgroundColor: ['#36a2eb', '#ff6384'], // Colors for the chart
+                    hoverBackgroundColor: ['#36a2eb', '#ff6384']
+                }]
+            };
+            const centerText = {
+                id: 'centerText',
+                beforeDraw(chart) {
+                    const ctx = chart.ctx;
+                    ctx.save();
+                    const width = chart.width;
+                    const height = chart.height;
+                    const fontSize = (height / 114).toFixed(2);
+                    ctx.font = `${fontSize}em sans-serif`;
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = 'black';
+                    const text = `${happyPathPercentage}%`,
+                        textX = Math.round((width - ctx.measureText(text).width) / 2),
+                        textY = height / 2;
+                    ctx.fillText(text, textX, textY);
+                    ctx.restore();
+                }
+            };
+            // Options for the donut chart
+            const donutOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        enabled: true
+                    },
+                    centerText // Add the center text plugin here
+                }
+            };
+            // Create the donut chart
+            const ctx = document.getElementById('happyPathDonutChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: donutData,
+                options: donutOptions,
+                plugins: [centerText] // Register the centerText plugin
+            });
+        });
+    </script>
+    <!-- Modal -->
+    <div id="transitionModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <div id="modal-header" class="modal-header">
+            <h2>Transition Details</h2>
+        </div>
+        <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const closeModalButton = document.querySelector('.close');
+        const modal = document.getElementById('transitionModal');
+
+        closeModalButton.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    });
+</script>
+
+        <div id="modal-body" class="modal-body">
+            <p id="modal-text"></p>
+            <button id="withButton">With</button>
+            <button id="withoutButton">Without</button>
+            <button id="selectButton">Select this Node</button> <!-- New button -->
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landing Page</title>
+    <style>
+        body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #ffffff; /* Dark muted purple background color */
+}
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 60px 80px;
+            max-width: 1200px;
+            margin: 0 auto;
+            border-radius: 15px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff; /* White background for contrast */
+            position: relative; /* Added relative positioning */
+            overflow: hidden; /* To ensure the design does not affect layout */
+        }
+        .text-content {
+            max-width: 50%;
+            animation: fadeInLeft 2s ease-in-out;
+        }
+        .text-content h1 {
+            font-size: 48px;
+            margin: 0;
+            line-height: 1.3;
+            color: #333;
+            animation: slideInLeft 1.5s ease-in-out;
+        }
+        .text-content p {
+            font-size: 18px;
+            margin: 20px 0;
+            color: #555;
+            animation: slideInLeft 2s ease-in-out;
+        }
+       .sparkle-button {
+            position: relative;
+            padding: 20px 40px; /* Increased button size */
+            font-size: 20px; /* Increased font size */
+            color: #FFFFFF; /* White text color */
+            background-color: #4B0082; /* Dark violet background color */
+            border: 2px solid #8A2BE2; /* Lighter violet border */
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 0 15px rgba(128, 0, 128, 0.5); /* Purple glowing effect around the button */
+            overflow: hidden;
+        }
+
+        .sparkle-button:hover {
+            background-color: #5D3FD3; /* Slightly lighter violet on hover */
+            transform: scale(1.1); /* Increase size on hover */
+            box-shadow: 0 0 25px rgba(128, 0, 128, 0.8); /* Intensify glow on hover */
+        }
+
+        .sparkle-button .star {
+            position: absolute;
+            fill: #FFFFFF; /* White color for the sparkles */
+            opacity: 0;
+            pointer-events: none;
+            animation: sparkleOutwards 2s infinite ease-in-out;
+            filter: drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.8)); /* Added shadow to the sparkles */
+        }
+
+        .star-1 { top: 0%; left: 10%; width: 20px; height: 20px; animation-delay: 0s; }
+        .star-2 { top: 50%; left: 100%; width: 25px; height: 25px; animation-delay: 0.5s; }
+        .star-3 { top: 100%; left: 50%; width: 15px; height: 15px; animation-delay: 1s; }
+        .star-4 { top: 50%; left: 0%; width: 30px; height: 30px; animation-delay: 1.5s; }
+        .star-5 { top: -10%; left: 80%; width: 15px; height: 15px; animation-delay: 2s; }
+        .star-6 { top: 80%; left: -10%; width: 20px; height: 20px; animation-delay: 2.5s; }
+
+        @keyframes sparkleOutwards {
+            0%, 100% {
+                transform: scale(0) translate(0, 0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1) translate(20px, 20px);
+                opacity: 1;
+            }
+        }
+
+        .sparkle-button .star {
+            animation: sparkleOutwards 3s infinite ease-in-out;
+        }
+
+        .sparkle-button:hover .star {
+            animation: sparkleOutwards 1.5s infinite ease-in-out;
+        }
+
+        /* Half-circle Design */
+        .half-circle-left {
+            position: absolute;
+            bottom: -100px;
+            left: -100px;
+            width: 400px;
+            height: 200px;
+            background-color: #32CD32; /* LimeGreen color */
+            border-top-left-radius: 200px;
+            border-top-right-radius: 200px;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+            z-index: -1; /* Ensures it's behind the content */
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        /* Smaller transparent circle inside the half-circle */
+        .transparent-circle {
+            position: absolute;
+            bottom: 10px;
+            left: 30px;
+            width: 150px;
+            height: 150px;
+            background-color: rgba(255, 255, 255, 0.3); /* Transparent white */
+            border-radius: 50%;
+            z-index: 0; /* Ensures it's above the half-circle but below content */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="text-content">
+            <h1>Hi, I am ONTRAAK</h1>
+            <p>Are you ready for a deep dive into your process?</p>
+            <button class="sparkle-button" onclick="window.location.href='/index'">Let's Dive in
+                <div class="star star-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 784.11 815.53" style="width: 100%; height: 100%;">
+                        <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"></path>
+                    </svg>
+                </div>
+                <div class="star star-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 784.11 815.53" style="width: 100%; height: 100%;">
+                        <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"></path>
+                    </svg>
+                </div>
+                <div class="star star-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 784.11 815.53" style="width: 100%; height: 100%;">
+                        <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"></path>
+                    </svg>
+                </div>
+                <div class="star star-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 784.11 815.53" style="width: 100%; height: 100%;">
+                        <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"></path>
+                    </svg>
+                </div>
+                <div class="star star-5">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 784.11 815.53" style="width: 100%; height: 100%;">
+                        <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"></path>
+                    </svg>
+                </div>
+                <div class="star star-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 784.11 815.53" style="width: 100%; height: 100%;">
+                        <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"></path>
+                    </svg>
+                </div>
+            </button>
+        </div>
+        <div class="image-content">
+            <img src="{{ url_for('uploaded_file', filename='background.jpg') }}" alt="Ontraak Image">
+        </div>
+        <div class="half-circle-left"></div>
+        <div class="transparent-circle"></div>
+    </div>
+</body>
+</html>
